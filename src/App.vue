@@ -5,6 +5,7 @@
     />
     <PostList
         :posts="posts"
+        @deletePost="deletePost"
     />
   </div>
 </template>
@@ -34,6 +35,9 @@ export default {
   methods: {
     createPost(post) {
       this.posts.push(post);
+    },
+    deletePost(id) {
+      this.posts = this.posts.filter(post => post.id !== id);
     }
   }
 }
