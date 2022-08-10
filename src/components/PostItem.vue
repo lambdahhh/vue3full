@@ -6,6 +6,7 @@
       </div>
       <div class="btns">
         <my-button @click="$emit('delete-post', post.id)">Delete</my-button>
+        <my-button @click="$router.push(`/posts/${post.id}`)">Open</my-button>
       </div>
     </div>
 </template>
@@ -32,6 +33,6 @@ export default {
   justify-content: space-between;
 }
 .btns {
-
+  display: flex;
 }
 </style>
