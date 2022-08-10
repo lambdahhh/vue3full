@@ -24,18 +24,19 @@
         @deletePost="deletePost"
     />
     <div v-if="isPostLoading === true">Посты загружаются</div>
-    <div class="page_wrapper">
-      <div
-        class="page"
-        v-for="pageNumber in totalPages"
-        :key="page"
-        @click="changePage(pageNumber)"
-        :class="{
-        'current-page': page === pageNumber
-        }">
-        {{ pageNumber }}
-      </div>
-    </div>
+    <div ref="observer" class="observer"></div>
+<!--    <div class="page_wrapper">-->
+<!--      <div-->
+<!--        class="page"-->
+<!--        v-for="pageNumber in totalPages"-->
+<!--        :key="page"-->
+<!--        @click="changePage(pageNumber)"-->
+<!--        :class="{-->
+<!--        'current-page': page === pageNumber-->
+<!--        }">-->
+<!--        {{ pageNumber }}-->
+<!--      </div>-->
+<!--    </div>-->
   </div>
 </template>
 
@@ -75,7 +76,20 @@ export default {
     }
   },
   mounted() {
-    this.fetchPost();
+    // this.fetchPost();
+
+    const options = {
+      rootMargin: '0px',
+      threshold: 1.0
+    }
+    const callback = (entries, observer) => {
+      if (entries[0].isIntersecting && this.page < this.totalPages) {
+        this.loadMorePost();
+      }
+    };
+    const observer = new IntersectionObserver(callback, options);
+    observer.observe(this.$refs.observer);
+
   },
   methods: {
     createPost(post) {
@@ -88,9 +102,9 @@ export default {
     showDialog() {
       this.dialogVisible = true;
     },
-    changePage(pageNumber) {
-      this.page = pageNumber;
-    },
+    // changePage(pageNumber) {
+    //   this.page = pageNumber;
+    // },
     async fetchPost() {
       try {
         this.isPostLoading = true;
@@ -108,6 +122,25 @@ export default {
       } finally {
         this.isPostLoading = false;
       }
+    },
+    async loadMorePost() {
+      try {
+        this.page++;
+        // this.isPostLoading = true;
+        setTimeout(async () => {
+          const response = await axios.get('https://jsonplaceholder.typicode.com/posts', {
+            params: {
+              _page: this.page,
+              _limit: this.limit
+            },
+          });
+          this.posts = [...this.posts, ...response.data];
+        }, 1000);
+      } catch (e) {
+        console.log('Error:', e)
+      } finally {
+        // this.isPostLoading = false;
+      }
     }
   },
   computed: {
@@ -119,9 +152,9 @@ export default {
     }
   },
   watch: {
-    page() {
-      this.fetchPost();
-    }
+    // page() {
+    //   this.fetchPost();
+    // }
   }
 }
 </script>
@@ -156,5 +189,9 @@ export default {
 
 .current-page {
   border: 2px solid teal;
+}
+.observer {
+  height: 30px;
+  background: green;
 }
 </style>
